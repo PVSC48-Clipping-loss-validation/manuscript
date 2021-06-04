@@ -29,7 +29,7 @@
 \maketitle
 
 \begin{abstract}
-Under-performance of solar PV systems is an important issue that increases risks for stakeholders like developers, investors and operators. Recently some attention has focused on underestimation of inverter clipping losses as a possible source of over-prediction where sub-hourly solar variability is high. Several models and data sets have been analyzed over the past few years, with the aim of quantifying, predicting, and correcting underestimated clipping loss errors for sites with high DC/AC ratio and solar variability. In this report, we compare operational data with a machine learning model developed at NREL to correct energy assessments based on hourly weather. In addition, the model is expanded to include site meta-data like DC/AC ratio as factors, so that the model is flexible enough to be used for estimating clipping loss error in energy assessments for a wide variety of sites. 
+Under-performance of solar PV systems is an important issue that increases risks for stakeholders like developers, investors and operators. Recently some attention has focused on underestimation of inverter clipping losses as a possible source of over-prediction where sub-hourly solar variability is high. Several models and data sets have been analyzed over the past few years, with the aim of quantifying, predicting, and correcting underestimated clipping loss errors for sites with high DC/AC ratio and solar variability. In this report, we compare operational data with a machine learning model developed at NREL to correct energy assessments based on hourly weather. In addition, the model is expanded to include site-specific information such as DC/AC ratio and modeled PV power as factors, so that the model is flexible enough to be used for estimating clipping loss error in energy assessments for a wide variety of sites. 
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -37,7 +37,7 @@ inverter, clipping, solar, irradiance, variability, performance, modeling, TMY
 \end{IEEEkeywords}
 
 \section{Introduction}
-In their "2020 Solar Risk Assessment" \cite{Matsui2020}, kWh Analytics warned that systematic underproduction across the industry exposes investors to increased risk. DNV found that a sample of 39 projects from 2019 were under-performing compared to their pre-construction energy assessments by up to 3\% on average as shown in Fig.~\ref{fig:project-underperformance}. NextEra reported that, "Sub-hourly solar resource variability impacts actual energy production by approximately 1-4\%." Cormode, \textit{et al.}, explained that energy assessments based on hourly weather, like typical meteorological year (TMY) data-sets, underestimate inverter clipping losses by up to 5\% for projects with intra-hourly solar variability, especially for high DC/AC ratios \cite{Cormode2019}. This is demonstrated in Fig.~\ref{fig:irradiance-and-power}, which shows irradiance and power output at 1-minute and 1-hour resolution in the top and bottom panels respectively. On July 10th, there is little intra-hour variability, a mostly clear day, and hourly and sub-hourly simulations are in close agreement. In contrast, July 13th has much higher solar variability, but no clipping is observed in the 1-hour output. However, the 1-minute resolution shows intermittent clipping all day long, indicating that not all of the available irradiance is used by the system, and the hourly simulation underestimates inverter clipping \cite{Kharait}.
+In their report "2020 Solar Risk Assessment" \cite{Matsui2020}, kWh Analytics warned that systematic underproduction across the industry exposes investors to increased risk. DNV found that a sample of 39 projects from 2019 were under-performing compared to their pre-construction energy assessments by up to 3\% on average, as shown in Fig.~\ref{fig:project-underperformance}. NextEra reported that, "sub-hourly solar resource variability impacts actual energy production by approximately 1-4\%." Cormode, \textit{et al.}, explained that energy assessments based on hourly weather, like typical meteorological year (TMY) data-sets, underestimate inverter clipping losses by up to 5\% for projects with intra-hourly solar variability, especially for high DC/AC ratios \cite{Cormode2019}. This is demonstrated in Fig.~\ref{fig:irradiance-and-power}, which shows irradiance and power output at 1-minute and 1-hour resolution in the top and bottom panels, respectively. On July 10th, there is little intra-hour variability, indicative of a mostly clear day where hourly and sub-hourly simulations are in close agreement. In contrast, July 13th has much higher solar variability, but no clipping is observed in the 1-hour output. However, the 1-minute resolution shows intermittent clipping all day long, indicating that not all of the available irradiance is used by the system, and the hourly simulations underestimate inverter clipping \cite{Kharait}.
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=9cm]{fig1.png}}
@@ -52,7 +52,7 @@ In their "2020 Solar Risk Assessment" \cite{Matsui2020}, kWh Analytics warned th
 \label{fig:irradiance-and-power}
 \end{figure}
 
-Several methods have been proposed to correct clipping loss errors in hourly predictions \cite{Cormode2019,Kharait,Anderson2020,Bradford}, but only NextEra validated their method with operational data \cite{Bradford}. In this report, we adopt the NREL machine learning-based model \cite{Anderson2020} to predict clipping loss corrections and apply them to hourly energy assessments. The adjusted energy assessment is then validated against operational data from the same site, and we report on the average and distribution of validation errors.  We have obtained data from seven operating PV systems in different climates and with a range of DC/AC ratios. In this paper, we will present the first of these systems, outline our method, and present preliminary results. The final paper will present validation results from all seven sites plus the NIST ground array \cite{Boyd2017b} as a benchmark.
+Several methods have been proposed to correct clipping loss error in hourly predictions \cite{Cormode2019,Kharait,Anderson2020,Bradford}, but only NextEra validated their method with operational data \cite{Bradford}. In this report, we adopt the NREL machine learning-based model \cite{Anderson2020} to predict clipping loss corrections and apply them to hourly energy assessments. The adjusted energy assessment is then validated against operational data from the same site, and we report on the average and distribution of validation errors.  We have obtained data from seven operating PV systems in different climates and with a range of DC/AC ratios. In this paper, we will present the first of these systems, outline our method, and present preliminary results. The final paper will present validation results from all seven sites plus the NIST ground array \cite{Boyd2017b} as a benchmark.
 
 \section{Methods}
 
@@ -62,29 +62,24 @@ The machine learning (ML) model developed at NREL has already been described in 
 
 \begin{figure}[htbp]
 \centerline{\includegraphics[width=9cm]{DCS_VI_heatmap.png}}
-\caption{Variability Index calculated at site A}
-\label{fig:irradiance-and-power}
+\caption{Average variability index calculated at site A. The variability index is calculated and aggregated at a 30-min interval using on-site POA measured at a 1-min time resolution.}
+\label{fig:DCS-VI}
 \end{figure}
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[width=9cm]{DCS_VI_heatmap.png}}
-\caption{Variability Index calculated at site A}
+\centerline{\includegraphics[width=9cm]{DCS_CLEC_heatmap.png}}
+\caption{Average clipping error correction calculated for site A using the ML model. The model predicts clipping error correction factor for each 30-min interval.}
 \label{fig:irradiance-and-power}
 \end{figure}
 
 \subsection{Validation}
 A challenge in validating the clipping loss correction model is the lack of quality high-frequency irradiance measurements that are co-located with operational PV systems. Therefore this model differs from traditional approaches for model training and validation because it relies on SURFRAD measurements and SAM simulated data to train the model, but uses operational data from different sites for validation. So no holdout methods are required in validating this model because the training and validation data sets are already independent. The downside of this method is that any systematic biases in SAM are introduced into the clipping loss correction model. In future work, if a large population of high-frequency irradiance and co-located operational data are obtained, the model can be retrained holding out a subset of the data for validation. This procedure would have the benefit of incorporating any physical effects that are not captured by SAM.
 
-\begin{figure}[htbp]
-\centerline{\includegraphics[width=9cm]{DCS_Inv_vs_POA_with_VI.png}}
-\caption{Power output of a 1000 kW inverter at site A}
-\label{fig:irradiance-and-power}
-\end{figure}
 
 \begin{figure}[htbp]
-\centerline{\includegraphics[width=9cm]{DCS_ModelBias_vs_POA_with_VI.png}}
-\caption{Model bias corresponding to the above inverter}
-\label{fig:irradiance-and-power}
+\centerline{\includegraphics[width=9cm]{DCS_Inv_ModelBias_POA_with_VI.png}}
+\caption{Inverter power and bias in the modeled power for a 1000 kW rated inverter at site A. Lower power and higher model bias are observed at higher variability index}
+\label{fig:inverter-power-model-bias}
 \end{figure}
 
 Quality of operational datasets is vital to avoid disruption of validation. Data points in the operational dataset related to plant sub-performance instances are considered to be outliers from the validation's standpoint and need to be removed. For this validation effort, data points where the difference between actual and simulated power is more than 50\% were removed. 
@@ -92,7 +87,6 @@ Quality of operational datasets is vital to avoid disruption of validation. Data
 
 Several metrics are used to measure the reduction in clipping loss errors from the hourly energy assessment, and identify if there are any unknown factors that are systematically affecting the results.
 
-\color{red} Show that the relation among model bias, poa and VI
 \begin{itemize}
 \item \textbf{Bias}: delta between the corrected energy assessment predictions and the measured operational data, so positive bias means over-predicted energy output 
 \begin{equation}
@@ -104,6 +98,32 @@ Where $E$ is the energy output.
 \mathit{MBE}=\frac{\sum_{n=1}^N{\Delta_n}}{N}\label{eq:mbe}
 \end{equation}
 Where $n$ is a single timestep, and $N$ is the total period of time. For example, with hourly timesteps, $N=8760\text{[hrs]}$, the number of timesteps in a typical annual energy assessment.
+
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=9cm]{DCS_ModelBias_CDF.png}}
+\caption{CDF of Model bias for site A}
+\label{fig:irradiance-and-power}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=9cm]{PAW_ModelBias_CDF.png}}
+\caption{CDF of Model bias for site B}
+\label{fig:irradiance-and-power}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=9cm]{DCS_ModelBias_breakdown_CDF.png}}
+\caption{Breakdown of bias at different variability for site A}
+\label{fig:irradiance-and-power}
+\end{figure}
+
+\begin{figure}[htbp]
+\centerline{\includegraphics[width=9cm]{PAW_ModelBias_breakdown_CDF.png}}
+\caption{Breakdown of bias at different variability for site B}
+\label{fig:irradiance-and-power}
+\end{figure}
+
 \item \textbf{Root mean squared error}: squares of the bias are positive, removing any cancellation of opposing errors, and therefore gives a measure of the width of the error distribution
 \begin{equation}
 \mathit{RMSE}=\sqrt{\frac{\sum_{n=1}^N{\Delta_n^2}}{N}}\label{eq:rmse}
